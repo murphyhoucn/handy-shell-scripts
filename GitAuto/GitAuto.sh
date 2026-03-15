@@ -1,17 +1,20 @@
 #!/bin/bash
 
+# 获取主机名作为设备名
 server_name=$(hostname)
 
-# 设置commit消息中的起始标记
-START_TAG="[Auto Commit]"
+# 获取 Git 用户名，如果没有配置则默认显示 UnknownUser
+git_user=$(git config --global --get user.name)
+if [ -z "$git_user" ]; then
+    git_user="UnknownUser"
+fi
 
-current_time=$(date "+%Y_%m_%d__%H_%M_%S")
+# 调整时间格式为: YYYY-MM-DD HH:MM
+short_time=$(date "+%Y-%m-%d %H:%M")
 
-# 执行git status
 echo "Running git status..."
 git status
 
-# 执行git add .
 echo "Running git add..."
 git add .
 
@@ -19,11 +22,10 @@ git add .
 if git diff-index --quiet HEAD --; then
     echo "No changes to commit."
 else
-    # 执行git commit
     echo "Running git commit..."
-    git commit -m "$START_TAG $current_time {From $server_name}"
+    # 优雅融合：[Auto] 用户名@设备名 | 时间
+    git commit -m "[Auto] $git_user@$server_name | $short_time"
 
-    # 执行git push
     echo "Running git push..."
     git push
 fi
