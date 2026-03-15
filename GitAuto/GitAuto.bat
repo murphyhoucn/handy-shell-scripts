@@ -1,31 +1,31 @@
 @echo off
 setlocal
 
-:: Get the current device's GitHub username
+:: 获取 Git 用户名，如果没有配置则默认显示 UnknownUser
 for /f "tokens=*" %%a in ('git config --global --get user.name') do set GITHUB_USER=%%a
+if not defined GITHUB_USER set GITHUB_USER=UnknownUser
 
-:: Check if the username was retrieved
-if not defined GITHUB_USER (
-    echo GitHub username not found. Please configure your GitHub username first.
-    pause
-    exit /b
-)
+:: 获取当前系统时间并调整格式 (YYYY-MM-DD HH:MM)
+for /f "tokens=2 delims==" %%a in ('wmic os get localdatetime /value') do set dt=%%a
+set SHORT_TIME=%dt:~0,4%-%dt:~4,2%-%dt:~6,2% %dt:~8,2%:%dt:~10,2%
 
-:: Get the current date and time
-for /f "tokens=2 delims==" %%a in ('wmic os get localdatetime /value') do set datetime=%%a
-set YEAR=%datetime:~0,4%
-set MONTH=%datetime:~4,2%
-set DAY=%datetime:~6,2%
-set HOUR=%datetime:~8,2%
-set MINUTE=%datetime:~10,2%
-set SECOND=%datetime:~12,2%
-set CURRENT_TIME=%YEAR%-%MONTH%-%DAY% %HOUR%:%MINUTE%:%SECOND%
-
-:: Execute Git commands
+:: 执行 Git 命令
+echo Running git status...
 git status
+echo Running git add...
 git add .
-git commit -m "Auto Commit by %GITHUB_USER% on %CURRENT_TIME%"
-git push
+
+:: 检查是否有需要提交的更改
+git diff-index --quiet HEAD --
+if %errorlevel% equ 0 (
+    echo No changes to commit.
+) else (
+    echo Running git commit...
+    :: 优雅融合：[Auto] 用户名@设备名 | 时间
+    git commit -m "[Auto] %GITHUB_USER%@%COMPUTERNAME% | %SHORT_TIME%"
+    echo Running git push...
+    git push
+)
 
 endlocal
 pause
