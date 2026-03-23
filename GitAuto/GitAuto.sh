@@ -62,3 +62,4 @@ else
 
     echo "Running git push..."
     git push
+fi
