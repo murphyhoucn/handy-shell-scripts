@@ -16,6 +16,8 @@ CANDIDATE_MOUNTS=(
     /data3
     /mnt
     /home
+    /home/mnt
+    /home/data
 )
 
 # 输出文件（默认含主机名和时间戳）
